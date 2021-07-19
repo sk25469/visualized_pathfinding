@@ -30,8 +30,9 @@ TURQUOISE = (64, 224, 208)
 
 class Node:
     def __init(self, row, col, width, total_row):
-        self.row = row
+        self.row = row        # Current row and col of the node
         self.col = col
+        self.width = width
         self.x = row * width  # This way we calculate the absoulute co-ordinate
         self.y = col * width
         self.color = WHITE    # Initially all the nodes are white
@@ -51,3 +52,52 @@ class Node:
     # We represent these nodes by GREEN
     def is_reachable(self):
         return self.color == GREEN
+
+    # to represent the barrier in the grid, we will use a BLACK color
+    def is_barrier(self):
+        return self.color == BLACK
+
+    # start node is defined with an ORANGE color
+    def is_start(self):
+        return self.color == ORANGE
+
+    # end node is defined by PURPLE color
+    def is_end(self):
+        return self.color == TURQUOISE
+
+    # to reset the color of current node
+    def reset(self):
+        return self.color == WHITE
+
+    # Now all the methods to make a particular node the different states describes above
+    def make_visited(self):
+        self.color = RED
+
+    def make_reachable(self):
+        self.color = GREEN
+
+    def make_barrier(self):
+        self.color = BLACK
+
+    def make_start(self):
+        self.color = ORANGE
+
+    def make_end(self):
+        self.color = TURQUOISE
+
+    # We will show the actual path from start to end with purple nodes
+    def make_path(self):
+        self.color = PURPLE
+
+    # Method to draw the barriers on the grid of a particular color, on the window
+    # win, at positions x and y from the top left corner
+    def draw(self, win):
+        pygame.draw.rect(
+            win, self.color, (self.x, self.y, self.width, self.width))
+
+    def update_neighbor(self, grid):
+        pass
+
+    # To compare the 2 nodes together we will define this method
+    def __lt__(self, other):
+        return False
