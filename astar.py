@@ -2,7 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue
 
-WIDTH = 800
+WIDTH = 700
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A* Path Finding Algorithm")
 
@@ -89,8 +89,10 @@ class Node:
     def make_path(self):
         self.color = PURPLE
 
-    # Method to draw the barriers on the grid of a particular color, on the window
-    # win, at positions x and y from the top left corner
+    # Method to draw on rectangle on the grid of a particular color, on the window
+    # win, then we give the rectangle to draw x,y co-ordinate as well as width and height
+    # in our case, width is same as height
+
     def draw(self, win):
         pygame.draw.rect(
             win, self.color, (self.x, self.y, self.width, self.width))
@@ -101,3 +103,71 @@ class Node:
     # To compare the 2 nodes together we will define this method
     def __lt__(self, other):
         return False
+
+# A* algorithm uses a heuristic function apart from normal edge distances, and this is how
+# it is better than dijsktra, so heuristic function can be thought as the actual distance between
+# the x and y co-ordinates of the nodes, hence we calculate the sum of actual distance and the
+# sum of edge distance to calculate which value to pop from the priority queue
+
+
+# Here we will call this heuristic distance absolute_dist, but actually we will be using
+# abs(x1 - x2) + abs(y1 - y2), we call this the manhattan distance
+
+def absolute_dist(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+# We need to make a grid, for that we will make a list of rows number of lists and for each
+# we will append the nodes
+
+
+def make_grid(rows, width):
+    grid = []
+    # This will be the gap between each of the columns, or the length of each cube
+    # width is the length of the whole window, hence we do integer division
+    gap = width // rows
+    for i in range(rows):
+        grid.append([])
+        for j in range(rows):
+            node = Node(i, j, gap, rows)
+            grid[i].append(node)
+
+    return grid
+
+# Now we will draw the actual grid, instead of drawing individual cubes, we can draw
+# vertical and horizontal lines
+
+
+def draw_grid(win, rows, width):
+    gap = width // rows
+    for i in range(rows):
+        # This draws the horizontal lines in the win window of the color GREY, the two arguments
+        # in the functions are the (start point), (end point)
+        #     (start_x, start_y), (end_x, end_y)
+        pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
+        for j in range(rows):
+            pygame.draw.line(win, GREY, (j * gap, 0), (j * gap, width))
+
+
+# This function draws the different colors on the window and tell the pygame to update
+# the screen when something new is drawn
+
+def draw(win, grid, rows, width):
+
+    # First we will fill the screen with white
+    win.fill(WHITE)
+
+    # Now we will draw the nodes of their own specific colors in the entire grid
+    for row in grid:
+        for node in row:
+            node.draw(win)
+
+    # the order is important here,
+    # 1. The screen is filled with WHITE
+    # 2. all the nodes are drawn with particular colors
+    # 3. now we will draw grid line on top of those nodes
+    draw_grid(win, rows, width)
+
+    # Now we will update the screen
+    pygame.display.update()
