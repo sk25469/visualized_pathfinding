@@ -169,5 +169,47 @@ def draw(win, grid, rows, width):
     # 3. now we will draw grid line on top of those nodes
     draw_grid(win, rows, width)
 
-    # Now we will update the screen
+    # Now we will update the screen, it will update every time we want to change something
     pygame.display.update()
+
+
+# This function will define the cursor x and y positions
+def get_clicked_pos(mouse_pos, rows, width):
+    gap = width // rows
+    y, x = mouse_pos
+
+    # This pin points the location to of the pointed node/cube
+    row = y // gap
+    col = x // gap
+
+    return row, col
+
+# The main function
+
+
+def main(win, width):
+    ROWS = 50
+    make_grid(ROWS, width)
+
+    # Start and end position
+    start = None
+    end = None
+
+    # if the app is running
+    run = True
+
+    # if the app has started
+    started = False
+
+    while run:
+        for events in pygame.event.get():
+
+            # If we quit the application
+            if events.type == pygame.QUIT:
+                run = False
+
+            # We do this so that user can't change the values while the algorithm is running
+            if started:
+                continue
+
+    pygame.quit()
