@@ -2,7 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue
 
-WIDTH = 800
+WIDTH = 700
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A* Path Finding Algorithm")
 
@@ -10,7 +10,7 @@ pygame.display.set_caption("A* Path Finding Algorithm")
 # Different color codes of the nodes in the grid
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-BLUE = (0, 255, 0)
+BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -87,7 +87,7 @@ class Node:
 
     # We will show the actual path from start to end with purple nodes
     def make_path(self):
-        self.color = PURPLE
+        self.color = BLUE
 
     # Method to draw on rectangle on the grid of a particular color, on the window
     # win, then we give the rectangle to draw x,y co-ordinate as well as width and height
@@ -118,13 +118,14 @@ class Node:
 
 # To compare the 2 nodes together we will define this method
 
+
     def __lt__(self, other):
         return False
 
 # A* algorithm uses a heuristic function apart from normal edge distances, and this is how
-# it is better than dijsktra, so heuristic function can be thought as the actual distance between
-# the x and y co-ordinates of the nodes, hence we calculate the sum of actual distance and the
-# sum of edge distance to calculate which value to pop from the priority queue
+# it is better than dijsktra, so heuristic function can be thought as the actual distance
+# between the x and y co-ordinates of the nodes, hence we calculate the sum of actual distance
+# and the sum of edge distance to calculate which value to pop from the priority queue
 
 
 # Here we will call this heuristic distance absolute_dist, but actually we will be using
@@ -144,7 +145,7 @@ def reconstruct_path(came_from, current, draw):
 
 
 # The A* Algorithm
-def algorithm(draw, grid, start, end):
+def astar_algorithm(draw, grid, start, end):
     count = 0
     open_set = PriorityQueue()
     # initially the total distance is 0, and we are keeping count of nodes to break ties if
@@ -225,8 +226,13 @@ def algorithm(draw, grid, start, end):
         if current != start:
             current.make_visited()
 
-    # if we didnot find the path
+    # if we did not find the path
     return False
+
+
+# Dijsktra's algorithm
+def dijsktra(draw, grid, start, end):
+    pass
 
 
 # We need to make a grid, for that we will make a list of rows number of lists and for each
@@ -296,7 +302,7 @@ def get_clicked_pos(mouse_pos, rows, width):
 
 
 def main(win, width):
-    ROWS = 60
+    ROWS = 50
     grid = make_grid(ROWS, width)
 
     # Start and end position
@@ -364,8 +370,8 @@ def main(win, width):
 
                     # We updated the neighbors and now we will run the algorithm
                     # lamda is anonymous function
-                    algorithm(lambda: draw(win, grid, ROWS, width),
-                              grid, start, end)
+                    astar_algorithm(lambda: draw(win, grid, ROWS, width),
+                                    grid, start, end)
 
                 # we can clear the entire screen to start from scratch
                 if events.key == pygame.K_c:
