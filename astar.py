@@ -2,7 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue
 
-WIDTH = 700
+WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A* Path Finding Algorithm")
 
@@ -40,7 +40,7 @@ class Node:
         self.total_row = total_row
 
     # returns the present co-ordinates of the current node
-    def get_node(self):
+    def get_pos(self):
         return self.row, self.col
 
     # to check if we already visited the current node
@@ -102,14 +102,14 @@ class Node:
         self.neighbors = []
 
         # DOWN
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
+        if self.row < self.total_row - 1 and not grid[self.row + 1][self.col].is_barrier():
             self.neighbors.append(grid[self.row + 1][self.col])
 
         # UP
         if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():  # UP
             self.neighbors.append(grid[self.row - 1][self.col])
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
+        if self.col < self.total_row - 1 and not grid[self.row][self.col + 1].is_barrier():
             self.neighbors.append(grid[self.row][self.col + 1])
 
         if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():  # LEFT
@@ -117,7 +117,6 @@ class Node:
 
 
 # To compare the 2 nodes together we will define this method
-
 
     def __lt__(self, other):
         return False
@@ -176,34 +175,57 @@ def algorithm(draw, grid, start, end):
                 pygame.quit()
 
         # the open set keeps 3 things, f_score, count of nodes and the nodes,
-        # we need only the node, hence 2
+        # we need only the node, hence 2 and we pop from the queue
         current = open_set.get()[2]
+
+        # then we remove the current node from the queue
         open_set_hash.remove(current)
 
+        # we found the end node and then reconstruct the path from end to start
         if current == end:
             reconstruct_path(came_from, end, draw)
+            # to make sure we dont color over the end node
             end.make_end()
+            start.make_start()
             return True
 
+        # we explore the neighbors of the current node
         for neighbor in current.neighbors:
+            # we are considering that the edge weights of the nodes are just 1
             temp_g_score = g_score[current] + 1
 
+            # if we found a better distance
             if temp_g_score < g_score[neighbor]:
+
+                # keeping track of the parent node of the current node
                 came_from[neighbor] = current
+
+                # updating the g_score and the f_score
                 g_score[neighbor] = temp_g_score
                 f_score[neighbor] = temp_g_score + \
                     absolute_dist(neighbor.get_pos(), end.get_pos())
+
+                # check if we already has the current node in queue
                 if neighbor not in open_set_hash:
+                    # increase the no. of nodes we found
                     count += 1
+
+                    # as it was not in queue, we put into the queue
                     open_set.put((f_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
-                    neighbor.make_open()
+
+                    # now we have to try the paths from the neighbors of the current node
+                    # so we make them open
+                    neighbor.make_reachable()
 
         draw()
 
+        # if the current node is not start node, we can color it red as in already visited
+        # so it won't be added in the queue
         if current != start:
-            current.make_closed()
+            current.make_visited()
 
+    # if we didnot find the path
     return False
 
 
@@ -274,7 +296,7 @@ def get_clicked_pos(mouse_pos, rows, width):
 
 
 def main(win, width):
-    ROWS = 50
+    ROWS = 60
     grid = make_grid(ROWS, width)
 
     # Start and end position
@@ -297,10 +319,6 @@ def main(win, width):
             # If we quit the application
             if events.type == pygame.QUIT:
                 run = False
-
-            # We do this so that user can't change the values while the algorithm is running
-            if started:
-                continue
 
             # Now we will look for the input from the user
             # We take 3 inputs, left to make barriers and start and end pos, space to start the algorithm
@@ -338,15 +356,22 @@ def main(win, width):
 
             # Now if we click space on keyboard, the algorithm should run
             if events.type == pygame.KEYDOWN:
-                if events.key == pygame.K_SPACE and not started:
+                if events.key == pygame.K_SPACE and start and end:
                     # We will update the neighbors of every node visited
                     for row in grid:
                         for node in row:
-                            node.update_neighbor()
+                            node.update_neighbor(grid)
 
                     # We updated the neighbors and now we will run the algorithm
+                    # lamda is anonymous function
                     algorithm(lambda: draw(win, grid, ROWS, width),
                               grid, start, end)
+
+                # we can clear the entire screen to start from scratch
+                if events.key == pygame.K_c:
+                    start = None
+                    end = None
+                    grid = make_grid(ROWS, width)
 
     pygame.quit()
 
