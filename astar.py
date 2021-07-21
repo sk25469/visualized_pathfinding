@@ -375,6 +375,24 @@ def get_clicked_pos(mouse_pos, rows, width):
 
     return row, col
 
+
+# # An intro screen
+# def game_intro(win, width):
+#     intro = True
+#     while intro:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 quit()
+
+#     win.fill(WHITE)
+#     largeText = pygame.font.Font('Arial', 155)
+#     textSurf, textRect = text_objects("test", largeText)
+#     textRect.centre = ((width/2), (width/2))
+#     win.blit(textSurf, textRect)
+#     pygame.display.update()
+#     clock.tick(15)
+
 # The main function
 
 
@@ -385,6 +403,10 @@ def main(win, width):
     # Start and end position
     start = None
     end = None
+
+    # taking input for Dijsktra vs A*
+    d = False
+    a = False
 
     # if the app is running
     run = True
@@ -442,10 +464,20 @@ def main(win, width):
                         for node in row:
                             node.update_neighbor(grid)
 
+                    print("Enter 1. Dijsktra")
+                    print("Enter 2. A*")
+                    a = input("Enter your choice :")
+
+                    a = int(a)
+
                     # We updated the neighbors and now we will run the algorithm
                     # lamda is anonymous function
-                    dijsktra(lambda: draw(win, grid, ROWS, width),
-                             grid, start, end)
+                    if a == 1:
+                        dijsktra(lambda: draw(win, grid, ROWS, width),
+                                 grid, start, end)
+                    elif a == 2:
+                        astar_algorithm(lambda: draw(win, grid, ROWS, width),
+                                        grid, start, end)
 
                 # we can clear the entire screen to start from scratch
                 if events.key == pygame.K_c:
