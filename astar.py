@@ -232,7 +232,84 @@ def astar_algorithm(draw, grid, start, end):
 
 # Dijsktra's algorithm
 def dijsktra(draw, grid, start, end):
-    pass
+    count = 0
+    open_set = PriorityQueue()
+
+    # initially the total distance is 0, and we are keeping count of nodes to break ties if
+    # two whose distances are same are encountered, we will consider the one who came first
+    open_set.put((0, count, start))
+
+    # this will keep track of the parent node of the current node
+    came_from = {}
+
+    # f_score is the total distance of g_score + absolute_distance
+    f_score = {node: float("inf") for row in grid for node in row}
+
+    # absolute_distance from start to the end node
+    f_score[start] = 0
+
+    # keeps track of all the items in the priority queue
+    open_set_hash = {start}
+
+    while not open_set.empty():
+
+        # To let the user quit the app while its running
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        # the open set keeps 3 things, f_score, count of nodes and the nodes,
+        # we need only the node, hence 2 and we pop from the queue
+        current = open_set.get()[2]
+
+        # then we remove the current node from the queue
+        open_set_hash.remove(current)
+
+        # we found the end node and then reconstruct the path from end to start
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            # to make sure we dont color over the end node
+            end.make_end()
+            start.make_start()
+            return True
+
+        # we explore the neighbors of the current node
+        for neighbor in current.neighbors:
+
+            # we are considering that the edge weights of the nodes are just 1
+            temp_f_score = f_score[current] + 1
+
+            # if we found a better distance
+            if temp_f_score < f_score[neighbor]:
+
+                # keeping track of the parent node of the current node
+                came_from[neighbor] = current
+
+                # updating the g_score and the f_score
+                f_score[neighbor] = temp_f_score
+
+                # check if we already has the current node in queue
+                if neighbor not in open_set_hash:
+                    # increase the no. of nodes we found
+                    count += 1
+
+                    # as it was not in queue, we put into the queue
+                    open_set.put((f_score[neighbor], count, neighbor))
+                    open_set_hash.add(neighbor)
+
+                    # now we have to try the paths from the neighbors of the current node
+                    # so we make them open
+                    neighbor.make_reachable()
+
+        draw()
+
+        # if the current node is not start node, we can color it red as in already visited
+        # so it won't be added in the queue
+        if current != start:
+            current.make_visited()
+
+    # if we did not find the path
+    return False
 
 
 # We need to make a grid, for that we will make a list of rows number of lists and for each
@@ -312,9 +389,6 @@ def main(win, width):
     # if the app is running
     run = True
 
-    # if the app has started
-    started = False
-
     while run:
 
         # We will draw the grid
@@ -370,8 +444,8 @@ def main(win, width):
 
                     # We updated the neighbors and now we will run the algorithm
                     # lamda is anonymous function
-                    astar_algorithm(lambda: draw(win, grid, ROWS, width),
-                                    grid, start, end)
+                    dijsktra(lambda: draw(win, grid, ROWS, width),
+                             grid, start, end)
 
                 # we can clear the entire screen to start from scratch
                 if events.key == pygame.K_c:
